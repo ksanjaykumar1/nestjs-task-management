@@ -62,4 +62,13 @@ export class TasksService {
   //   task.status = status;
   //   return task;
   // }
+
+  async getTaskById(id: string): Promise<Task> {
+    const found = await this.tasksRepository.findOne({ where: { id } });
+
+    if (!found) {
+      throw new NotFoundException(`Task with Id "${id}" not found`);
+    }
+    return found;
+  }
 }
