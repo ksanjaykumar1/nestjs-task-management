@@ -71,15 +71,14 @@ export class TasksService {
     }
     return found;
   }
-  async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-    const { title, description } = createTaskDto;
-
-    const task = this.tasksRepository.create({
-      title,
-      description,
-      status: TaskStatus.OPEN,
-    });
-    await this.tasksRepository.save(task);
-    return task;
+  createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+    return this.tasksRepository.createTask(createTaskDto);
+  }
+  deleteTaskById(id: string): Promise<Task> {
+    return this.tasksRepository.removeTaskById(id);
+  }
+  async updateTaskById(id: string, status: TaskStatus): Promise<Task> {
+    const task = await this.getTaskById(id);
+    return this.tasksRepository.updateTaskById(task, status);
   }
 }

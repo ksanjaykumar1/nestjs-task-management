@@ -57,4 +57,16 @@ export class TasksController {
   createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return this.tasksService.createTask(createTaskDto);
   }
+  @Delete('/:id')
+  async deleteTaskById(@Param('id') id: string): Promise<Task> {
+    return this.tasksService.deleteTaskById(id);
+  }
+  @Patch('/:id/status')
+  updateTaskById(
+    @Param('id') id: string,
+    @Body() updateTaskStatusDto: UpdateTaskStatusDto,
+  ): Promise<Task> {
+    const { status } = updateTaskStatusDto;
+    return this.tasksService.updateTaskById(id, status);
+  }
 }
