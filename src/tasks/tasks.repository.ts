@@ -1,25 +1,17 @@
-import { Brackets, Repository } from 'typeorm';
+import { Brackets } from 'typeorm';
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './task-status.enum';
 import { NotFoundException } from '@nestjs/common';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { AppDataSource } from 'src';
 
-export interface TasksRepository extends Repository<Task> {
-  this: Repository<Task>;
-  getTasks(filterDto: GetTasksFilterDto): Promise<Task[]>;
-  getTaskById(id: string): Promise<Task>;
-  createTask(createTaskDto: CreateTaskDto): Promise<Task>;
-  removeTaskById(id: string): Promise<Task>;
-  updateTaskById(task: Task, status: TaskStatus): Promise<Task>;
-}
-
-export const customTasksRepository: Pick<TasksRepository, any> = {
-  getTaskById(this: Repository<Task>, id) {
+export const customTasksRepository = AppDataSource.getRepository(Task).extend({
+  getTaskById(id: string) {
     return this.findOne({ where: { id } });
   },
 
-  async getTasks(this: Repository<Task>, filterDto) {
+  async getTasks(filterDto: GetTasksFilterDto) {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('task');
     if (status) {
@@ -39,7 +31,7 @@ export const customTasksRepository: Pick<TasksRepository, any> = {
     return tasks;
   },
 
-  createTask(this: Repository<Task>, createTaskDto) {
+  createTask(createTaskDto: CreateTaskDto) {
     const { title, description } = createTaskDto;
     const task = this.create({
       title,
@@ -49,7 +41,7 @@ export const customTasksRepository: Pick<TasksRepository, any> = {
     this.save(task);
     return task;
   },
-  async removeTaskById(this: Repository<Task>, id) {
+  async removeTaskById(id: string) {
     const task = await this.findOne({ where: { id } });
     if (!task) {
       throw new NotFoundException(`Task with Id "${id}" not found`);
@@ -57,9 +49,9 @@ export const customTasksRepository: Pick<TasksRepository, any> = {
     await this.remove(task);
     return task;
   },
-  async updateTaskById(this: Repository<Task>, task: Task, status: TaskStatus) {
+  async updateTaskById(task: Task, status: TaskStatus) {
     task.status = status;
     await this.save(task);
     return task;
   },
-};
+});
