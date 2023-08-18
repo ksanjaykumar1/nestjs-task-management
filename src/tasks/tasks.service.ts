@@ -8,11 +8,11 @@ import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class TasksService {
-  getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
-    return customTasksRepository.getTasks(filterDto);
+  getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
+    return customTasksRepository.getTasks(filterDto, user);
   }
-  async getTaskById(id: string): Promise<Task> {
-    const found = await customTasksRepository.findOne({ where: { id } });
+  async getTaskById(id: string, user: User): Promise<Task> {
+    const found = await customTasksRepository.findOne({ where: { id, user } });
 
     if (!found) {
       throw new NotFoundException(`Task with Id "${id}" not found`);
@@ -22,11 +22,15 @@ export class TasksService {
   createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
     return customTasksRepository.createTask(createTaskDto, user);
   }
-  deleteTaskById(id: string): Promise<Task> {
-    return customTasksRepository.removeTaskById(id);
+  deleteTaskById(id: string, user: User): Promise<Task> {
+    return customTasksRepository.removeTaskById(id, user);
   }
-  async updateTaskById(id: string, status: TaskStatus): Promise<Task> {
-    const task = await this.getTaskById(id);
+  async updateTaskById(
+    id: string,
+    status: TaskStatus,
+    user: User,
+  ): Promise<Task> {
+    const task = await this.getTaskById(id, user);
     return customTasksRepository.updateTaskById(task, status);
   }
 }

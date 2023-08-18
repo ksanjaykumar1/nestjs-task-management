@@ -8,13 +8,14 @@ import { AppDataSource } from 'src';
 import { User } from 'src/auth/user.entity';
 
 export const customTasksRepository = AppDataSource.getRepository(Task).extend({
-  getTaskById(id: string) {
-    return this.findOne({ where: { id } });
+  getTaskById(id: string, user: User) {
+    return this.findOne({ where: { id, user } });
   },
 
-  async getTasks(filterDto: GetTasksFilterDto) {
+  async getTasks(filterDto: GetTasksFilterDto, user: User) {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('task');
+    query.where('task.userId = :userId', { userId: user.id });
     if (status) {
       query.andWhere('task.status = :status', { status });
     }
@@ -43,8 +44,8 @@ export const customTasksRepository = AppDataSource.getRepository(Task).extend({
     this.save(task);
     return task;
   },
-  async removeTaskById(id: string) {
-    const task = await this.findOne({ where: { id } });
+  async removeTaskById(id: string, user: User) {
+    const task = await this.findOne({ where: { id, user } });
     if (!task) {
       throw new NotFoundException(`Task with Id "${id}" not found`);
     }
