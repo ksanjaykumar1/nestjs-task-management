@@ -5,6 +5,7 @@ import { TaskStatus } from './task-status.enum';
 import { NotFoundException } from '@nestjs/common';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { AppDataSource } from 'src';
+import { User } from 'src/auth/user.entity';
 
 export const customTasksRepository = AppDataSource.getRepository(Task).extend({
   getTaskById(id: string) {
@@ -31,12 +32,13 @@ export const customTasksRepository = AppDataSource.getRepository(Task).extend({
     return tasks;
   },
 
-  createTask(createTaskDto: CreateTaskDto) {
+  createTask(createTaskDto: CreateTaskDto, user: User) {
     const { title, description } = createTaskDto;
     const task = this.create({
       title,
       description,
       status: TaskStatus.OPEN,
+      user,
     });
     this.save(task);
     return task;
