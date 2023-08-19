@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Task } from './tasks/task.entity';
 import { User } from './auth/user.entity';
+import { Logger } from '@nestjs/common';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -15,6 +16,7 @@ export const AppDataSource = new DataSource({
 
 AppDataSource.initialize()
   .then(() => {
-    console.log('initialized connection with database');
+    const logger = new Logger();
+    logger.log('Initialized connection with database');
   })
   .catch((error) => console.log(error));

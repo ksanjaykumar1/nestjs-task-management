@@ -1,10 +1,15 @@
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './task-status.enum';
-import { NotFoundException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { AppDataSource } from 'src';
 import { User } from 'src/auth/user.entity';
+const logger = new Logger();
 
 export const customTasksRepository = AppDataSource.getRepository(Task).extend({
   getTaskById(id: string, user: User) {
@@ -24,8 +29,18 @@ export const customTasksRepository = AppDataSource.getRepository(Task).extend({
         { search: `%${search}%` },
       );
     }
-    const tasks = await query.getMany();
-    return tasks;
+    try {
+      const tasks = await query.getMany();
+      return tasks;
+    } catch (error) {
+      logger.error(
+        `Failed to get tasks for user"${
+          user.username
+        }. Filters: ${JSON.stringify(GetTasksFilterDto)}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException();
+    }
   },
 
   createTask(createTaskDto: CreateTaskDto, user: User) {
