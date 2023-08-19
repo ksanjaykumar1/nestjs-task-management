@@ -1,4 +1,3 @@
-import { Brackets } from 'typeorm';
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './task-status.enum';
@@ -21,12 +20,8 @@ export const customTasksRepository = AppDataSource.getRepository(Task).extend({
     }
     if (search) {
       query.andWhere(
-        new Brackets((qb) => {
-          qb.where(
-            'LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search)',
-            { search: `%${search}%` },
-          );
-        }),
+        '(LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search))',
+        { search: `%${search}%` },
       );
     }
     const tasks = await query.getMany();
